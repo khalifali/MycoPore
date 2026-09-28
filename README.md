@@ -6,23 +6,13 @@ MycoPore is a research code and workflow for studying how the morphology of fung
 
 The long-term goal is to connect
 
-[
-	ext{growth / morphology}
-ightarrow
-	ext{pore geometry}
-ightarrow
-	ext{pore-scale physics}
-ightarrow
-	ext{effective properties}
-ightarrow
-	ext{material performance}
-]
+**Growth and morphology** → **pore geometry** → **pore-scale physics** → **effective properties** → **material performance**
 
 with an initial focus on **acoustics**, followed by heat and mass transport, permeability, and eventually inverse design.
 
 ---
 
-## 1. Scientific idea
+## Scientific idea
 
 Fungal and mycelium-based materials possess a hierarchical pore structure created by interacting hyphae, substrate particles, branches, constrictions, voids, and potentially strong anisotropy.
 
@@ -30,34 +20,22 @@ Rather than treating the material only through bulk empirical correlations, Myco
 
 For acoustics, the intended modelling chain is
 
-[
-oxed{
-	ext{synthetic fungal geometry}
-ightarrow
-	ext{pore-scale CFD}
-ightarrow
-(phi,sigma,alpha_infty,Lambda,Lambda')
-ightarrow
-	ext{JCAL}
-ightarrow
-alpha(f)
-}
-]
+**Synthetic fungal geometry** → **pore-scale CFD** → **effective parameters** → **JCAL model** → **sound absorption**
 
 where
 
-- (phi) is open porosity,
-- (sigma) is airflow resistivity,
-- (alpha_infty) is high-frequency tortuosity,
-- (Lambda) is the viscous characteristic length,
-- (Lambda') is the thermal characteristic length,
-- (alpha(f)) is the frequency-dependent sound absorption coefficient.
+- $\phi$ is open porosity,
+- $\sigma$ is airflow resistivity,
+- $\alpha_\infty$ is high-frequency tortuosity,
+- $\Lambda$ is the viscous characteristic length,
+- $\Lambda'$ is the thermal characteristic length,
+- $\alpha(f)$ is the frequency-dependent sound absorption coefficient.
 
 A later stage will directly solve thermoviscous acoustics in resolved pore geometries for selected validation cases.
 
 ---
 
-## 2. Main research questions
+## Main research questions
 
 MycoPore will initially address questions such as:
 
@@ -70,9 +48,9 @@ MycoPore will initially address questions such as:
 
 ---
 
-## 3. Modelling strategy
+## Modelling strategy
 
-### 3.1 Geometry generation
+### Geometry generation
 
 The first geometries will be synthetic and progressively increase in complexity:
 
@@ -86,9 +64,9 @@ The first geometries will be synthetic and progressively increase in complexity:
 
 A fungal network can initially be represented as connected cylindrical hyphal segments defined by
 
-[
-(mathbf{x}_i,mathbf{x}_j,d_h)
-]
+$$
+(\mathbf{x}_i,\mathbf{x}_j,d_h)
+$$
 
 for each segment, with branching rules controlling orientation, length, diameter, and connectivity.
 
@@ -96,48 +74,35 @@ The geometry generator should eventually support periodic representative volume 
 
 ---
 
-## 4. Pore-scale CFD
+## Pore-scale CFD
 
-### 4.1 Computational domain
+### Computational domain
 
-The solid fungal structure is treated as an impermeable solid and only the connected gas phase is meshed:
+The solid fungal structure is treated as impermeable; the connected gas phase defines the computational domain:
 
-[
-Omega_f = Omega_{mathrm{RVE}} - Omega_{mathrm{solid}}.
-]
+$$
+\Omega_f = \Omega_{\mathrm{RVE}} \setminus \Omega_{\mathrm{solid}}.
+$$
 
 The initial meshing workflow is
 
-[
-	ext{Python geometry}
-ightarrow
-	ext{STL/OBJ}
-ightarrow
-	ext{blockMesh}
-ightarrow
-	ext{snappyHexMesh}
-ightarrow
-	ext{checkMesh}.
-]
+**Python geometry** → **STL/OBJ** → **blockMesh** → **snappyHexMesh** → **checkMesh**
 
 The background mesh is Cartesian, with local refinement near hyphae, junctions, and narrow gaps.
 
 For early Stokes-flow calculations, the priority is geometric convergence rather than boundary-layer prism meshes.
 
-### 4.2 First solver
+### First solver
 
 The first CFD problem is steady creeping flow:
 
-[
--
-abla p + mu 
-abla^2 mathbf{u}=0,
-]
+$$
+-\nabla p + \mu\nabla^2\mathbf{u}=0,
+$$
 
-[
-
-ablacdotmathbf{u}=0.
-]
+$$
+\nabla\cdot\mathbf{u}=0.
+$$
 
 Boundary conditions:
 
@@ -147,27 +112,27 @@ Boundary conditions:
 
 From the volumetric flow rate
 
-[
-Q=int_A u_n,dA,
-]
+$$
+Q=\int_A u_n\,\mathrm{d}A,
+$$
 
 the permeability is obtained from Darcy's law:
 
-[
-K=rac{mu LQ}{ADelta p},
-]
+$$
+K=\frac{\mu LQ}{A\Delta p},
+$$
 
 and the airflow resistivity is
 
-[
-oxed{sigma=rac{mu}{K}}.
-]
+$$
+\sigma=\frac{\mu}{K}.
+$$
 
-The same RVE can be driven independently in (x), (y), and (z) to quantify anisotropy.
+The same RVE can be driven independently in $x$, $y$, and $z$ to quantify anisotropy.
 
 ---
 
-## 5. Literature context: pore-scale CFD with idealised particle and fibre geometries
+## Literature context: pore-scale CFD with idealised particle and fibre geometries
 
 A substantial pore-scale CFD literature supports the use of idealised geometric primitives to represent porous microstructures. This is important for MycoPore because the fungal skeleton does not need to be reconstructed from CT data in the first stage; it can be generated computationally from connected particles, elongated particles, or fibres and the flow can be resolved through the remaining pore space.
 
@@ -199,13 +164,13 @@ Non-spherical particle geometry has also been used extensively for pore-scale pe
 
 **Xu et al. (2022)** studied dense mono- and polydisperse spheroidal porous media and quantified the effects of aspect ratio, orientation and size distribution on tortuosity and permeability.
 
-A **2025 Transport in Porous Media** study generated ellipsoidal beds using superquadric particle representations in LIGGGHTS, converted the structures to pore geometries, and then performed pore-scale CFD in OpenFOAM. This is one of the closest technical precedents for MycoPore:
+A **2025 *Transport in Porous Media*** study generated ellipsoidal beds using superquadric particle representations in LIGGGHTS, converted the structures to pore geometries, and then performed pore-scale CFD in OpenFOAM. This is one of the closest technical precedents for MycoPore:
 
-\`\`\`text
+```text
 DEM superquadrics → explicit porous geometry → OpenFOAM pore-scale CFD → permeability
-\`\`\`
+```
 
-A **2026 Computers & Geotechnics** study likewise investigated permeability of superquadric granular materials using coupled DEM–LBM.
+A **2026 *Computers & Geotechnics*** study likewise investigated permeability of superquadric granular materials using coupled DEM–LBM.
 
 These works support the planned use of elongated superellipsoids as a compact representation of approximately cylindrical hyphal segments.
 
@@ -231,7 +196,7 @@ The literature supports three levels of idealisation:
 
 MycoPore will therefore investigate the workflow
 
-\`\`\`text
+```text
 biologically inspired network generator
         ↓
 connected oriented superellipsoidal / particle segments
@@ -241,7 +206,7 @@ resolved immersed-boundary pore-scale CFD
 K, sigma, tortuosity and local flow fields
         ↓
 poroacoustic homogenisation
-\`\`\`
+```
 
 The intended distinction from much of the granular literature is that the particles are not necessarily physical grains. They are geometric primitives representing a **connected fungal skeleton**. The network connectivity is retained separately as a graph, allowing the same morphology to be used later for growth models, structural mechanics, breakage and graph-based machine learning.
 
@@ -259,7 +224,7 @@ For validation, selected geometries will also be solved with a conventional body
 - *Microstructure Simulation to Predict the Influence of Particle Properties on Permeability of Granular Porous Media* (Transport in Porous Media, 2025).
 - *Investigation of permeability of superquadric granular materials based on discrete element–lattice Boltzmann method* (Computers & Geotechnics, 2026).
 
-## 6. Validation ladder
+## Validation ladder
 
 No biologically complex geometry should be used before the numerical workflow passes simple benchmark cases.
 
@@ -267,9 +232,9 @@ No biologically complex geometry should be used before the numerical workflow pa
 
 Validate against Hagen-Poiseuille flow:
 
-[
-Q=rac{pi R^4}{8mu L}Delta p.
-]
+$$
+Q=\frac{\pi R^4\Delta p}{8\mu L}.
+$$
 
 Target: mesh-independent agreement with the analytical solution.
 
@@ -295,21 +260,17 @@ Apply the complete meshing and homogenisation workflow to a generated hyphal net
 
 ---
 
-## 7. Acoustic modelling roadmap
+## Acoustic modelling roadmap
 
 ### Phase A — Homogenised poroacoustics
 
-The first acoustic model will **not** resolve acoustic waves directly inside every pore.
+The first acoustic model will use pore-scale calculations to obtain effective parameters rather than resolving acoustic waves in every pore.
 
 Instead, pore-scale calculations will be used to obtain effective parameters such as
 
-[
-phi,quad
-sigma,quad
-alpha_infty,quad
-Lambda,quad
-Lambda'.
-]
+$$
+\phi,\quad\sigma,\quad\alpha_\infty,\quad\Lambda,\quad\Lambda'.
+$$
 
 These will be supplied to a Johnson-Champoux-Allard / JCAL-type model to calculate frequency-dependent effective density, bulk modulus, impedance, and sound absorption.
 
@@ -321,15 +282,15 @@ Selected pore geometries will later be solved directly using the linearised comp
 
 The intended unknowns are the complex perturbations
 
-[
-hat p,qquad hat{mathbf u},qquad hat T.
-]
+$$
+\hat p,\qquad\hat{\mathbf u},\qquad\hat T.
+$$
 
 A future OpenFOAM solver may split each field into real and imaginary parts:
 
-[
+$$
 p=p_R+ip_I,
-]
+$$
 
 with analogous representations for velocity and temperature.
 
@@ -342,7 +303,7 @@ Direct pore-scale thermoviscous simulations will primarily be used for:
 
 ---
 
-## 8. Planned repository structure
+## Planned repository structure
 
 ```text
 MycoPore/
@@ -375,7 +336,7 @@ The structure is intentionally broader than acoustics so that the same geometrie
 
 ---
 
-## 9. First milestone
+## First milestone
 
 The first milestone is deliberately small:
 
@@ -386,7 +347,7 @@ The first implementation sequence is:
 1. implement the single-tube geometry,
 2. create a reproducible OpenFOAM 13 mesh,
 3. run steady creeping flow,
-4. compare (Q) and (K) against Hagen-Poiseuille,
+4. compare $Q$ and $K$ against Hagen-Poiseuille,
 5. perform a mesh-convergence study,
 6. automate post-processing,
 7. extend the same workflow to a branching geometry.
@@ -395,21 +356,11 @@ Only after this workflow is robust should the project move to generated fungal n
 
 ---
 
-## 10. Longer-term vision
+## Longer-term vision
 
 The broader MycoPore workflow is intended to evolve toward
 
-[
-oxed{	ext{growth conditions}}
-ightarrow
-oxed{	ext{3-D fungal morphology}}
-ightarrow
-oxed{	ext{multiphysics properties}}
-ightarrow
-oxed{	ext{physics/ML surrogate}}
-ightarrow
-oxed{	ext{inverse material design}}.
-]
+**Growth conditions** → **3-D fungal morphology** → **multiphysics properties** → **physics/ML surrogate** → **inverse material design**
 
 Possible future outputs include:
 
@@ -428,5 +379,7 @@ The central scientific objective is not merely to simulate fungal materials, but
 ## Status
 
 Project initiated: September 2026.
+
+This README describes the planned research workflow. The repository currently contains the project roadmap; the listed solvers, cases, and directory tree are planned work.
 
 Current stage: **Phase 0 — geometry, meshing, and pore-flow validation.**
