@@ -167,7 +167,99 @@ The same RVE can be driven independently in (x), (y), and (z) to quantify anisot
 
 ---
 
-## 5. Validation ladder
+## 5. Literature context: pore-scale CFD with idealised particle and fibre geometries
+
+A substantial pore-scale CFD literature supports the use of idealised geometric primitives to represent porous microstructures. This is important for MycoPore because the fungal skeleton does not need to be reconstructed from CT data in the first stage; it can be generated computationally from connected particles, elongated particles, or fibres and the flow can be resolved through the remaining pore space.
+
+### Sphere-based porous media
+
+**Martys, Torquato & Bentz (1994)** studied transport in model porous media generated from random overlapping and non-overlapping spheres. The work is an early example showing that collections of simple primitives can be used as synthetic porous microstructures and still yield meaningful effective transport properties.
+
+**Pan, Hilpert & Miller (2001)** simulated flow through random sphere packings using lattice-Boltzmann and pore-network methods. Their work established direct links between explicitly resolved particle geometry and permeability.
+
+**Zaman & Jalali (2010)** used CFD to resolve flow through random monodisperse sphere packings containing up to thousands of particles and extracted Darcy permeability directly from the simulated interparticle flow.
+
+These studies establish that an explicit sphere assembly is a standard and physically useful pore-scale representation.
+
+### Overlapping spheres and multi-sphere approximations
+
+Some studies deliberately use overlapping spheres or multi-sphere clusters to represent a continuous or irregular solid rather than literal separate particles.
+
+**Lane et al. (2013)** used overlapping spheres as a surrogate microstructure for consolidated porous materials and compared numerical flow approaches.
+
+**Kerimov et al. (2018)** discussed multi-sphere representations as a practical route for approximating irregular particle geometries.
+
+This is directly relevant to the first MycoPore fallback representation, in which a hyphal branch can be approximated by a chain of overlapping resolved spheres. The important numerical requirement is that the immersed-boundary forcing represents the **union of the solid geometry**, so overlap is not double counted.
+
+### Spheroids, ellipsoids and superquadric particles
+
+Non-spherical particle geometry has also been used extensively for pore-scale permeability studies.
+
+**Kerimov et al. (2018)** generated porous structures containing spheres, prolate spheroids, oblate spheroids and irregular convex particles and solved the pore flow using lattice Boltzmann. A central result was that particle shape can affect permeability strongly even when porosity changes only modestly.
+
+**Xu et al. (2022)** studied dense mono- and polydisperse spheroidal porous media and quantified the effects of aspect ratio, orientation and size distribution on tortuosity and permeability.
+
+A **2025 Transport in Porous Media** study generated ellipsoidal beds using superquadric particle representations in LIGGGHTS, converted the structures to pore geometries, and then performed pore-scale CFD in OpenFOAM. This is one of the closest technical precedents for MycoPore:
+
+\`\`\`text
+DEM superquadrics → explicit porous geometry → OpenFOAM pore-scale CFD → permeability
+\`\`\`
+
+A **2026 Computers & Geotechnics** study likewise investigated permeability of superquadric granular materials using coupled DEM–LBM.
+
+These works support the planned use of elongated superellipsoids as a compact representation of approximately cylindrical hyphal segments.
+
+### Fibrous porous media
+
+Fibrous porous media are probably the closest physical analogue to fungal hyphae.
+
+**Koponen et al. (1998)** calculated creeping flow through three-dimensional random fibre webs and predicted permeability from the synthetic fibre geometry.
+
+**Nabovati et al. (2009)** generated synthetic three-dimensional random fibre media and used lattice Boltzmann to study the effects of fibre diameter, aspect ratio, curvature and orientation on permeability.
+
+**Yazdchi, Srivastava & Luding (2011)** solved Stokes flow through periodic fibrous structures with circular, elliptical and square cross-sections and quantified the dependence of permeability on fibre geometry and orientation.
+
+These studies are especially important for MycoPore because they show that realistic porous transport can be investigated using **synthetically generated fibre networks without requiring CT reconstruction**.
+
+### Implications for MycoPore
+
+The literature supports three levels of idealisation:
+
+1. **sphere assemblies** for baseline and validation studies,
+2. **overlapping sphere chains / multi-sphere bodies** for approximate fibre or hyphal geometry,
+3. **elongated spheroids or superellipsoids** for a more compact and smoother representation of individual hyphal segments.
+
+MycoPore will therefore investigate the workflow
+
+\`\`\`text
+biologically inspired network generator
+        ↓
+connected oriented superellipsoidal / particle segments
+        ↓
+resolved immersed-boundary pore-scale CFD
+        ↓
+K, sigma, tortuosity and local flow fields
+        ↓
+poroacoustic homogenisation
+\`\`\`
+
+The intended distinction from much of the granular literature is that the particles are not necessarily physical grains. They are geometric primitives representing a **connected fungal skeleton**. The network connectivity is retained separately as a graph, allowing the same morphology to be used later for growth models, structural mechanics, breakage and graph-based machine learning.
+
+For validation, selected geometries will also be solved with a conventional body-fitted mesh. Agreement between the immersed-boundary and body-fitted solutions will determine whether the particle representation is sufficiently accurate for large morphology campaigns.
+
+### Core references to follow
+
+- Martys, N. S., Torquato, S. & Bentz, D. P. (1994). *Universal scaling of fluid permeability for sphere packings*. Physical Review E.
+- Koponen, A. et al. (1998). *Permeability of Three-Dimensional Random Fiber Webs*. Physical Review Letters.
+- Pan, C., Hilpert, M. & Miller, C. T. (2001). Pore-scale modelling of flow through sphere packings.
+- Nabovati, A., Llewellin, E. W. & Sousa, A. C. M. (2009). Permeability of three-dimensional fibrous porous media by lattice Boltzmann.
+- Yazdchi, K., Srivastava, S. & Luding, S. (2011). Microstructural effects on permeability of fibrous porous media.
+- Kerimov, A. et al. (2018). Pore-scale simulations examining particle-shape effects on permeability.
+- Xu et al. (2022). Tortuosity and permeability of dense spheroidal porous media.
+- *Microstructure Simulation to Predict the Influence of Particle Properties on Permeability of Granular Porous Media* (Transport in Porous Media, 2025).
+- *Investigation of permeability of superquadric granular materials based on discrete element–lattice Boltzmann method* (Computers & Geotechnics, 2026).
+
+## 6. Validation ladder
 
 No biologically complex geometry should be used before the numerical workflow passes simple benchmark cases.
 
@@ -203,7 +295,7 @@ Apply the complete meshing and homogenisation workflow to a generated hyphal net
 
 ---
 
-## 6. Acoustic modelling roadmap
+## 7. Acoustic modelling roadmap
 
 ### Phase A — Homogenised poroacoustics
 
@@ -250,7 +342,7 @@ Direct pore-scale thermoviscous simulations will primarily be used for:
 
 ---
 
-## 7. Planned repository structure
+## 8. Planned repository structure
 
 ```text
 MycoPore/
@@ -283,7 +375,7 @@ The structure is intentionally broader than acoustics so that the same geometrie
 
 ---
 
-## 8. First milestone
+## 9. First milestone
 
 The first milestone is deliberately small:
 
@@ -303,7 +395,7 @@ Only after this workflow is robust should the project move to generated fungal n
 
 ---
 
-## 9. Longer-term vision
+## 10. Longer-term vision
 
 The broader MycoPore workflow is intended to evolve toward
 
